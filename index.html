@@ -7,7 +7,6 @@
   <style>
     .hidden { display: none; }
     .question-box, .menu-box, .submenu-box, .navigation, .selected-info, .login-box, .summary-box { margin: 20px 0; }
-    button { margin: 5px; }
     body {
     font-family: 'Segoe UI', Tahoma, 'Geneva', Verdana, sans-serif;
     background-color: #f0f4f8;
@@ -19,7 +18,7 @@
       text-align: center;
       color: #0a1f44; /* Navy */
     }
-    .question-box, .menu-box, .submenu-box, .navigation, .selected-info, .login-box, .summary-box {
+    .question-box, .menu-box, .submenu-box, .navigation, .selected-info, .login-box, .summary-box, .userId {
       background: #ffffff;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -71,10 +70,10 @@
       <script>
     window.onload = loadSession;
   </script>
-  <h1>Tree Testing Landing Page</h1>
+  <h1>Quiz Landing Page - No Timer</h1>
 
   <div class="login-box" id="loginBox">
-    <label for="userId">Enter User ID:</label>
+    <label for="userId" style="font-weight: bold">Enter User ID:</label>
     <input type="text" id="userId" />
     <button id="startBtn" onclick="validateUserId()">Start</button>
     <button id="resumeBtn" class="hidden" onclick="resumeSession()">Continue with previous session</button>
@@ -82,21 +81,22 @@
     <p id="loginMessage" style="color: red;"></p>
   </div>
 
-  <div class="question-box hidden">
+  <div class="question-box hidden" style="font-weight: bold">
     <p id="question"></p>
   </div>
 
   <div class="menu-box hidden">
-    <p>Select category:</p>
+    <p style="font-weight: bold">Select category:</p>
     <div id="topMenus"></div>
   </div>
 
-  <div class="submenu-box hidden" id="submenuContainer">
-    <p>Select detail:</p>
+  <div class="submenu-box hidden" id="submenuContainer" >
+    <p style="font-weight: bold">Select detail:</p>
     <div id="subMenus"></div>
   </div>
 
   <div class="selected-info hidden">
+    <p id="selectedLabel">You selected:</p>
     <p id="selectedText"></p>
   </div>
 
@@ -218,6 +218,7 @@
       document.getElementById("question").textContent = questionOrder[currentQuestionIndex];
       document.getElementById("submenuContainer").classList.add("hidden");
       document.getElementById("selectedText").textContent = "";
+      document.querySelector(".selected-info").classList.add("hidden");
       selectedTop = null;
     }
 
@@ -231,6 +232,8 @@
           selectedTop = key;
           renderSubMenus(key);
           document.getElementById("submenuContainer").classList.remove("hidden");
+          document.querySelector(".selected-info").classList.remove("hidden");
+          document.getElementById("selectedText").textContent = topMenus[key].label;
         };
         container.appendChild(btn);
       });
@@ -258,7 +261,8 @@
             firstSelection[question] = true;
           }
 
-          document.getElementById("selectedText").textContent = "You selected: " + sub;
+          document.querySelector(".selected-info").classList.remove("hidden");
+          document.getElementById("selectedText").textContent = `${topMenus[topKey].label} - ${sub}`;
           const topLabel = topMenus[topKey].label;
           sendToSheet(question, topLabel, sub);
           answerRecord[question] = { top: topLabel, sub };
@@ -282,96 +286,11 @@
         saveSession();
         loadQuestion();
       } else {
-        showSummary();
+        showLoginBox();
       }
     }
 
-    function showSummary() {
-      document.querySelectorAll(".question-box, .menu-box, .submenu-box, .navigation, .selected-info").forEach(el => el.classList.add("hidden"));
-      const summaryBox = document.getElementById("summaryBox");
-      const summaryList = document.getElementById("summaryList");
-      document.getElementById("summaryUser").textContent = `User ID: ${currentUserId}`;
-      summaryList.innerHTML = '';
-      questions.forEach(q => {
-        const res = answerRecord[q];
-        let text;
-        if (!res) {
-          text = `${q} → No answer`;
-        } else if (res.top && res.sub) {
-          text = `${q} → ${res.top} / ${res.sub}`;
-        } else if (res.top) {
-          text = `${q} → ${res.top}`;
-        } else {
-          text = `${q} → No answer`;
-        }
-        const li = document.createElement("li");
-        li.textContent = text;
-        summaryList.appendChild(li);
-      });
 
-      // Pie chart: answer breakdown
-      const fullAnswers = questions.filter(q => answerRecord[q] && answerRecord[q].top && answerRecord[q].sub).length;
-      const topOnlyAnswers = questions.filter(q => answerRecord[q] && answerRecord[q].top && !answerRecord[q].sub).length;
-      const noAnswers = questions.length - fullAnswers - topOnlyAnswers;
-      const chartContainer = document.createElement("div");
-      chartContainer.innerHTML = `<canvas id='summaryChart' width='300' height='300'></canvas>`;
-      summaryBox.appendChild(chartContainer);
-
-      const chartData = [];
-      const chartLabels = [];
-      const chartColors = [];
-
-      if (fullAnswers > 0) {
-        chartLabels.push('Full Answer');
-        chartData.push(fullAnswers);
-        chartColors.push('#4caf50');
-      }
-      if (topOnlyAnswers > 0) {
-        chartLabels.push('Top Menu Only');
-        chartData.push(topOnlyAnswers);
-        chartColors.push('#ff9800');
-      }
-      if (noAnswers > 0) {
-        chartLabels.push('No Answer');
-        chartData.push(noAnswers);
-        chartColors.push('#f44336');
-      }
-
-      if (chartData.length > 0) {
-        new Chart(document.getElementById('summaryChart'), {
-          type: 'pie',
-          data: {
-            labels: chartLabels,
-            datasets: [{
-              data: chartData,
-              backgroundColor: chartColors
-            }]
-          },
-          options: {
-            responsive: false,
-            plugins: {
-              legend: {
-                position: 'bottom'
-              }
-            }
-          }
-        });
-      }
-
-      // Average idle time between questions (in seconds)
-      const times = Object.values(answerRecord).map(r => r.time).filter(Boolean);
-      let avgIdleTime = 0;
-      if (times.length > 1) {
-        const diffs = times.slice(1).map((t, i) => (t - times[i]) / 1000);
-        avgIdleTime = diffs.reduce((a, b) => a + b, 0) / diffs.length;
-      }
-      const timePara = document.createElement("p");
-      timePara.textContent = `Average idle time between questions: ${avgIdleTime.toFixed(2)} seconds`;
-      summaryBox.appendChild(timePara);
-
-      summaryBox.classList.remove("hidden");
-      localStorage.clear();
-    }
 
 
     function showLoginBox() {
