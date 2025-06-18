@@ -18,7 +18,7 @@
       text-align: center;
       color: #0a1f44; /* Navy */
     }
-    .question-box, .menu-box, .submenu-box, .navigation, .selected-info, .login-box, .summary-box, .userId {
+    .question-box, .menu-box, .submenu-box, .selected-info, .navigation, .login-box, .summary-box, .userId {
       background: #ffffff;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -63,20 +63,21 @@
     margin: 20px auto;
     }
     button.next-btn {
-    background-color: white;
-    color: #e53935;
-    border: 2px solid #e53935;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
+      background-color: white;
+      color: #e53935;
+      border: 2px solid #e53935;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
     }
 
     button.next-btn:hover {
       background-color: #e53935;
       color: white;
     }
+
 
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -86,7 +87,7 @@
       <script>
     window.onload = loadSession;
   </script>
-  <h1>Tree Testing Landing Page</h1>
+  <h1>Quiz Landing Page - No Timer</h1>
 
   <div class="login-box" id="loginBox">
     <label for="userId" style="font-weight: bold">Enter User ID:</label>
@@ -106,6 +107,10 @@
     <div id="topMenus"></div>
   </div>
 
+  <div class="submenu-box hidden" id="submenuContainer" >
+    <p style="font-weight: bold">Select detail:</p>
+    <div id="subMenus"></div>
+  </div>
 
   <div class="selected-info hidden">
     <p id="selectedLabel">You selected:</p>
@@ -124,7 +129,6 @@
   </div>
 
   <script>
-    const validUserIds = ["S1", "S2", "S3", "S4", "S5","L1", "L2", "L3", "L4", "L5","lan"];
     let currentUserId = "";
     let questionOrder = [];
     let answeredQuestions = [];
@@ -136,27 +140,15 @@
     let answerRecord = {}; 
 
     const questions = [
-      "You're planning to take a Graphic design book from the library and want to confirm how long you can keep it.",
-      "Find a private space for a group meeting.",
-      "For a group assignment, you need an academic article, but you can't find it anywhere in the library's collection. You want to ask the library to make it available.",
-      "You need guidance on how to properly cite external sources for your assignment. You want to schedule a meeting with a library staff member to go through it.",
-      "Find out if you could still access physical and electronic items from the library's collection even after you graduated from RMIT.",
-      "You want to use AI generative tool to brainstorm some ideas for your assignment. Do you need to declare that you have used it?",
-      "For a group presentation, you want to use some images and video clips from the internet. Do you need to cite them or can you just them freely?",
-      "You have unique learning requirements and are looking for information on accommodations and assistance provided by the library.",
-      "You heard that the library often hosts sessions to help students with things like researching and citing. You would like to attend one.",
-      "You're working on an assignment and need to find unique historical images or visual materials.",
-      "You successfully defended your thesis and would like to share your outputs with the RMIT community.",
-      "Find out whether the library is open on Saturday and until what time.",
-      "You are beginning a big research project for your Economics course. You want to find a library expert for your course topic."
+      "Question 1?", "Question 2?", "Question 3?", "Question 4?", "Question 5?"
     ];
 
     const topMenus = {
-      1: { label: "1. Borrowing and booking", subs: ["1.1 Borrowing and returning", "1.2 Book a study room", "1.3 Make a purchase request", "1.4 Book your consultation", "1.5 Alumni support"] },
-      2: { label: "2. Study", subs: ["2.1 Study FAQs", "2.2 Referencing", "2.3 Copyright advice", "2.4 Disability and neurodiverisy support", "2.5 Sign up for live workshops"] },
-      3: { label: "3. Teach", subs: ["3.1 Developing course content", "3.2 Organise workshops and consultations", "3.3 Teach using Open Education Resources", "3.4Copyright advice"] },
-      4: { label: "4. Research", subs: ["4.1 Open Textbook", "4.2 Digital archive", "4.3 Research data", "4.4 Open Acess Publishing"] },
-      5: { label: "5. About Us", subs: ["5.1 Hours and locations", "5.2 Meet the team"] }
+      1: { label: "Booking and Returning", subs: ["1.1", "1.2", "1.3", "1.4", "1.5"] },
+      2: { label: "Study", subs: ["2.1", "2.2", "2.3", "2.4", "2.5"] },
+      3: { label: "Account Management", subs: ["3.1", "3.2", "3.3", "3.4", "3.5"] },
+      4: { label: "Facilities", subs: ["4.1", "4.2", "4.3", "4.4", "4.5"] },
+      5: { label: "Feedback", subs: ["5.1", "5.2", "5.3", "5.4", "5.5"] }
     };
 
     function saveSession() {
@@ -327,8 +319,6 @@
         showLoginBox();
       }
     }
-
-
 
 
     function showLoginBox() {
