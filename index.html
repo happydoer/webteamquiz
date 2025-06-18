@@ -299,7 +299,7 @@
         btn.textContent = sub;
         btn.onclick = () => {
           if (firstSelection[question]) {
-            if (selectionChanges[question] >= 2) {
+            if (selectionChanges[question] >= 4) {
               alert("You can only change your selection 2 times for each question!");
               return;
             }
