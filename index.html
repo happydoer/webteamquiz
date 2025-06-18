@@ -87,7 +87,7 @@
       <script>
     window.onload = loadSession;
   </script>
-  <h1>Quiz Landing Page - No Timer</h1>
+  <h1>Tree Testing Landing Page</h1>
 
   <div class="login-box" id="loginBox">
     <label for="userId" style="font-weight: bold">Enter User ID:</label>
@@ -277,8 +277,7 @@
 
         // Update selected text if submenu hasn't been chosen
         if (!answerRecord[question]) {
-            // document.getElementById("selectedTop").textContent = topMenus[key].label;
-            document.getElementById("selectedTop").textContent = `${topMenus[key].label}`;
+            document.getElementById("selectedTop").textContent = topMenus[key].label;
             document.getElementById("selectedSub").textContent = "";
             document.querySelector(".selected-info").classList.remove("hidden");
         }
