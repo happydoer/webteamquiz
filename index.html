@@ -253,20 +253,36 @@
     }
 
     function renderTopMenus() {
-      const container = document.getElementById("topMenus");
-      container.innerHTML = '';
-      Object.keys(topMenus).forEach(key => {
+    const container = document.getElementById("topMenus");
+    container.innerHTML = '';
+    Object.keys(topMenus).forEach(key => {
         const btn = document.createElement("button");
         btn.textContent = `${key}. ${topMenus[key].label}`;
         btn.onclick = () => {
-          selectedTop = key;
-          renderSubMenus(key);
-          document.getElementById("submenuContainer").classList.remove("hidden");
-          document.querySelector(".selected-info").classList.remove("hidden");
-          document.getElementById("selectedText").textContent = topMenus[key].label;
+        const question = questionOrder[currentQuestionIndex];
+        if (!selectionChanges[question]) selectionChanges[question] = 0;
+
+        if (selectedTop !== key) {
+            if (selectionChanges[question] > 3) {
+            alert("You can only change your selection 2 times per question!");
+            return;
+            }
+            selectionChanges[question]++;
+        }
+
+        selectedTop = key;
+        renderSubMenus(key);
+        document.getElementById("submenuContainer").classList.remove("hidden");
+
+        // Update selected text if submenu hasn't been chosen
+        if (!answerRecord[question]) {
+            document.getElementById("selectedTop").textContent = topMenus[key].label;
+            document.getElementById("selectedSub").textContent = "";
+            document.querySelector(".selected-info").classList.remove("hidden");
+        }
         };
         container.appendChild(btn);
-      });
+    });
     }
 
     function renderSubMenus(topKey) {
