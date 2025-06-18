@@ -140,16 +140,16 @@
     let answerRecord = {}; 
 
     const questions = [
-      "You want to borrow this Graphic design book but not sure how long you could keep it for.",
+      "You're planning to take a Graphic design book from the library and want to confirm how long you can keep it.",
       "Find a private space for a group meeting.",
       "For a group assignment, you need an academic article, but you can't find it anywhere in the library's collection. You want to ask the library to make it available.",
       "You need guidance on how to properly cite external sources for your assignment. You want to schedule a meeting with a library staff member to go through it.",
       "Find out if you could still access physical and electronic items from the library's collection even after you graduated from RMIT.",
       "You want to use AI generative tool to brainstorm some ideas for your assignment. Do you need to declare that you have used it?",
       "For a group presentation, you want to use some images and video clips from the internet. Do you need to cite them or can you just them freely?",
-      "As a student with a different way of learning and interacting with course materials, you want to know if there is accommodation and assistance for your study.",
-      "You heard that the library often hosts sessions to help students with things like researching and referencing. You would like to attend one.",
-      "You're working on an assignment and need to find unique historical images or visual materials that might help your research.",
+      "You have unique learning requirements and are looking for information on accommodations and assistance provided by the library.",
+      "You heard that the library often hosts sessions to help students with things like researching and citing. You would like to attend one.",
+      "You're working on an assignment and need to find unique historical images or visual materials.",
       "You successfully defended your thesis and would like to share your outputs with the RMIT community.",
       "Find out whether the library is open on Saturday and until what time.",
       "You are beginning a big research project for your Economics course. You want to find a library expert for your course topic."
@@ -251,53 +251,67 @@
     }
 
     function renderTopMenus() {
-      const container = document.getElementById("topMenus");
-      container.innerHTML = '';
-      Object.keys(topMenus).forEach(key => {
+    const container = document.getElementById("topMenus");
+    container.innerHTML = '';
+    Object.keys(topMenus).forEach(key => {
         const btn = document.createElement("button");
         btn.textContent = `${key}. ${topMenus[key].label}`;
         btn.onclick = () => {
-          selectedTop = key;
-          renderSubMenus(key);
-          document.getElementById("submenuContainer").classList.remove("hidden");
-          document.querySelector(".selected-info").classList.remove("hidden");
-          document.getElementById("selectedText").textContent = topMenus[key].label;
+        const question = questionOrder[currentQuestionIndex];
+        if (!selectionChanges[question]) selectionChanges[question] = 0;
+
+        if (selectedTop !== key) {
+            if (selectionChanges[question] > 3) {
+            alert("You can only change your selection 2 times per question!");
+            return;
+            }
+            selectionChanges[question]++;
+        }
+
+        selectedTop = key;
+        renderSubMenus(key);
+        document.getElementById("submenuContainer").classList.remove("hidden");
+
+        // Update selected text if submenu hasn't been chosen
+        if (!answerRecord[question]) {
+            document.getElementById("selectedTop").textContent = topMenus[key].label;
+            document.getElementById("selectedSub").textContent = "";
+            document.querySelector(".selected-info").classList.remove("hidden");
+        }
         };
         container.appendChild(btn);
-      });
+    });
     }
 
     function renderSubMenus(topKey) {
-      const container = document.getElementById("subMenus");
-      container.innerHTML = '';
-      const question = questionOrder[currentQuestionIndex];
-
-      if (!selectionChanges[question]) selectionChanges[question] = 0;
-      if (!firstSelection[question]) firstSelection[question] = false;
-
-      topMenus[topKey].subs.forEach(sub => {
+    const container = document.getElementById("subMenus");
+    container.innerHTML = '';
+    const question = questionOrder[currentQuestionIndex];
+    topMenus[topKey].subs.forEach(sub => {
         const btn = document.createElement("button");
         btn.textContent = sub;
         btn.onclick = () => {
-          if (firstSelection[question]) {
-            if (selectionChanges[question] >= 2) {
-              alert("You can only change your selection 2 times for each question!");
-              return;
-            }
-            selectionChanges[question]++;
-          } else {
-            firstSelection[question] = true;
-          }
+        if (!selectionChanges[question]) selectionChanges[question] = 0;
 
-          document.querySelector(".selected-info").classList.remove("hidden");
-          document.getElementById("selectedText").textContent = `${topMenus[topKey].label} - ${sub}`;
-          const topLabel = topMenus[topKey].label;
-          sendToSheet(question, topLabel, sub);
-          answerRecord[question] = { top: topLabel, sub };
-          saveSession();
+        if (selectionChanges[question] > 3) {
+            alert("You can only change your selection 2 times per question!");
+            return;
+        }
+
+        selectionChanges[question]++;
+        const topLabel = topMenus[topKey].label;
+        selectedTop = topKey;
+
+        document.getElementById("selectedTop").textContent = topLabel;
+        document.getElementById("selectedSub").textContent = ` - ${sub}`;
+        document.querySelector(".selected-info").classList.remove("hidden");
+
+        sendToSheet(question, topLabel, sub);
+        answerRecord[question] = { top: topLabel, sub };
+        saveSession();
         };
         container.appendChild(btn);
-      });
+    });
     }
 
     function nextQuestion() {
