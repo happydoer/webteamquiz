@@ -106,10 +106,6 @@
     <div id="topMenus"></div>
   </div>
 
-  <div class="submenu-box hidden" id="submenuContainer" >
-    <p style="font-weight: bold">Select detail:</p>
-    <div id="subMenus"></div>
-  </div>
 
   <div class="selected-info hidden">
     <p id="selectedLabel">You selected:</p>
@@ -261,7 +257,7 @@
         if (!selectionChanges[question]) selectionChanges[question] = 0;
 
         if (selectedTop !== key) {
-            if (selectionChanges[question] > 2) {
+            if (selectionChanges[question] > 3) {
             alert("You can only change your selection 2 times per question!");
             return;
             }
