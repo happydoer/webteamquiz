@@ -277,7 +277,8 @@
 
         // Update selected text if submenu hasn't been chosen
         if (!answerRecord[question]) {
-            document.getElementById("selectedTop").textContent = topMenus[key].label;
+            // document.getElementById("selectedTop").textContent = topMenus[key].label;
+            document.getElementById("selectedTop").textContent = `${topMenus[key].label}`;
             document.getElementById("selectedSub").textContent = "";
             document.querySelector(".selected-info").classList.remove("hidden");
         }
