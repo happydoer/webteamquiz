@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Add menu function -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tree Testing Landing Page</title>
@@ -77,7 +78,34 @@
       background-color: #e53935;
       color: white;
     }
+    select#selectTopMenu,
+    input#customTopMenu,
+    input#customSubMenu {
+      padding: 10px;
+      width: calc(100% - 22px);
+      margin-top: 5px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      background-color: #ffffff;
+    }
 
+    #submitCustomBtn {
+      background-color: #0a1f44;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s;
+    }
+
+    #submitCustomBtn:hover {
+      background-color: #e53935;
+    }
 
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -128,17 +156,28 @@
     <button onclick="showLoginBox()">Restart</button>
   </div>
 
+
+  <div class="menu-box hidden" id="customMenuBox">
+    <p style="font-weight: bold">Select or create a new Top Menu/Sub Menu:</p>
+    <select id="selectTopMenu" onchange="handleTopMenuSelection()">
+      <option value="">-- Select Top Menu --</option>
+    </select>
+    <input type="text" id="customTopMenu" placeholder="(Optional) Enter new Top Menu..." class="hidden">
+    <input type="text" id="customSubMenu" placeholder="(Optional) Enter Sub Menu..." class="hidden">
+    <button onclick="submitCustomMenu()" class="hidden" id="submitCustomBtn">Submit your selection</button>
+  </div>
+
+
   <script>
     const validUserIds = ["S1", "S2", "S3", "S4", "S5"];
     let currentUserId = "";
     let questionOrder = [];
     let answeredQuestions = [];
     let currentQuestionIndex = 0;
-    let switchCount = 0;
     let selectedTop = null;
-    let selectionChanges = {}; 
-    let firstSelection = {}; 
-    let answerRecord = {}; 
+    let selectedSub = null;
+    let selectionChanges = {};
+    let answerRecord = {};
 
     const questions = [
       "1. You're planning to take a Graphic design book from the library and want to confirm how long you can keep it.",
@@ -158,13 +197,160 @@
 
     const topMenus = {
       1: { label: "1. Borrowing and booking", subs: ["1.1 Borrowing and returning", "1.2 Book a study room", "1.3 Make a purchase request", "1.4 Book your consultation", "1.5 Alumni support"] },
-      2: { label: "2. Study", subs: ["2.1 Study FAQs", "2.2 Referencing", "2.3 Copyright advice", "2.4 Disability and neurodiverisy support", "2.5 Sign up for live workshops"] },
-      3: { label: "3. Teach", subs: ["3.1 Developing course content", "3.2 Organise workshops and consultations", "3.3 Teach using Open Education Resources", "3.4Copyright advice"] },
+      2: { label: "2. Study", subs: ["2.1 Study FAQs", "2.2 Referencing", "2.3 Copyright advice", "2.4 Disability and neurodiversity support", "2.5 Sign up for live workshops"] },
+      3: { label: "3. Teach", subs: ["3.1 Developing course content", "3.2 Organise workshops and consultations", "3.3 Teach using Open Education Resources", "3.4 Copyright advice"] },
       4: { label: "4. Research", subs: ["4.1 Open Textbook", "4.2 Digital archive", "4.3 Research data", "4.4 Open Acess Publishing"] },
       5: { label: "5. About Us", subs: ["5.1 Hours and locations", "5.2 Meet the team"] }
     };
 
     function saveSession() {
+      localStorage.setItem("quizUser", currentUserId);
+      localStorage.setItem("quizAnswered", JSON.stringify(answeredQuestions));
+      localStorage.setItem("quizOrder", JSON.stringify(questionOrder));
+    }
+
+    function loadSession() {
+      const user = localStorage.getItem("quizUser");
+      if (user) {
+        document.getElementById("startBtn").classList.add("hidden");
+        document.getElementById("resumeBtn").classList.remove("hidden");
+        document.getElementById("newUserBtn").classList.remove("hidden");
+        document.getElementById("userId").value = user;
+      }
+    }
+
+    function populateTopMenuSelect(selectedKey = null) {
+      const select = document.getElementById("selectTopMenu");
+      select.innerHTML = '<option value="">-- Select Top Menu --</option>';
+      if (selectedKey && topMenus[selectedKey]) {
+        const option = document.createElement("option");
+        option.value = selectedKey;
+        option.textContent = topMenus[selectedKey].label;
+        option.selected = true;
+        select.appendChild(option);
+      }
+      const customOption = document.createElement("option");
+      customOption.value = "custom";
+      customOption.textContent = "Create new Top/Sub Menu";
+      select.appendChild(customOption);
+    }
+
+    function renderTopMenus() {
+      const container = document.getElementById("topMenus");
+      container.innerHTML = '';
+      Object.keys(topMenus).forEach(key => {
+        const btn = document.createElement("button");
+        btn.textContent = `${topMenus[key].label}`;
+        btn.onclick = () => {
+          const question = questions[currentQuestionIndex];
+          if (!selectionChanges[question]) selectionChanges[question] = { top: 0, sub: 0 };
+
+          if (selectedTop !== key) {
+            if (selectionChanges[question].top >= 2) {
+              alert("You can only change your top menu selection up to 2 times.");
+              return;
+            }
+            if (selectedTop !== null) selectionChanges[question].top++;
+            selectedTop = key;
+            selectedSub = null;
+            populateTopMenuSelect(key);
+            renderSubMenus(key);
+            document.getElementById("submenuContainer").classList.remove("hidden");
+            document.getElementById("customMenuBox").classList.remove("hidden");
+          }
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderSubMenus(topKey) {
+      const container = document.getElementById("subMenus");
+      container.innerHTML = '';
+      topMenus[topKey].subs.forEach(sub => {
+        const btn = document.createElement("button");
+        btn.textContent = sub;
+        btn.onclick = () => {
+          const question = questions[currentQuestionIndex];
+          if (!selectionChanges[question]) selectionChanges[question] = { top: 0, sub: 0 };
+
+          if (selectedSub !== sub) {
+            if (selectionChanges[question].sub >= 2) {
+              alert("You can only change your sub menu selection up to 2 times.");
+              return;
+            }
+            if (selectedSub !== null) selectionChanges[question].sub++;
+            selectedSub = sub;
+
+            document.querySelector(".selected-info").classList.remove("hidden");
+            document.getElementById("selectedText").textContent = `${topMenus[topKey].label} - ${sub}`;
+            sendToSheet(question, topMenus[topKey].label, sub);
+            answerRecord[question] = { top: topMenus[topKey].label, sub };
+            saveSession();
+          }
+        };
+        container.appendChild(btn);
+      });
+    }
+
+
+    function handleTopMenuSelection() {
+      const value = document.getElementById("selectTopMenu").value;
+      const customInput = document.getElementById("customTopMenu");
+      const subInput = document.getElementById("customSubMenu");
+      const submitBtn = document.getElementById("submitCustomBtn");
+
+      if (value === "") {
+        customInput.classList.add("hidden");
+        subInput.classList.add("hidden");
+        submitBtn.classList.add("hidden");
+        return;
+      }
+      subInput.classList.remove("hidden");
+      submitBtn.classList.remove("hidden");
+
+      if (value === "custom") {
+        customInput.classList.remove("hidden");
+      } else {
+        customInput.classList.add("hidden");
+      }
+    }
+
+
+    function submitCustomMenu() {
+      const question = questionOrder[currentQuestionIndex];
+      const selectVal = document.getElementById("selectTopMenu").value;
+      const topMenu = selectVal === "custom" ? document.getElementById("customTopMenu").value.trim() : topMenus[selectVal]?.label || "";
+      const subMenu = document.getElementById("customSubMenu").value.trim();
+
+      if (!topMenu) {
+        alert("You need to select or create a Top Menu.");
+        return;
+      }
+
+      document.querySelector(".selected-info").classList.remove("hidden");
+      document.getElementById("selectedText").textContent = subMenu ? `${topMenu} - ${subMenu}` : topMenu;
+      sendToSheet(question, topMenu, subMenu);
+      answerRecord[question] = { top: topMenu, sub: subMenu };
+      saveSession();
+      document.getElementById("customTopMenu").value = "";
+      document.getElementById("customSubMenu").value = "";
+    }
+
+
+    function sendToSheet(question, topMenu, subMenu) {
+      const formData = new FormData();
+      formData.append("userId", currentUserId);
+      formData.append("question", question);
+      formData.append("topMenu", topMenu);
+      formData.append("subMenu", subMenu);
+      fetch("https://script.google.com/macros/s/AKfycbzeZl8HiFGm5VLw71_y96sNuPI9ZGfh3S3wqhEnq3jfeiUe3gXUbbYHLoKOj1nVKc4/exec", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.text())
+      .then(txt => console.log("Submitted:", txt))
+      .catch(err => console.error("Submission error:", err));
+    }    function saveSession() {
       localStorage.setItem("quizUser", currentUserId);
       localStorage.setItem("quizAnswered", JSON.stringify(answeredQuestions));
       localStorage.setItem("quizOrder", JSON.stringify(questionOrder));
@@ -215,28 +401,15 @@
         saveSession();
         document.getElementById("loginBox").style.display = "none";
         document.querySelectorAll(".question-box, .menu-box, .navigation, .selected-info, .submenu-box").forEach(el => el.classList.remove("hidden"));
+        document.getElementById("customMenuBox").classList.remove("hidden");
         loadQuestion();
         renderTopMenus();
+        populateTopMenuSelect();
       } else {
         document.getElementById("loginMessage").textContent = "User ID not found.";
       }
     }
 
-    function sendToSheet(question, topMenu, subMenu) {
-      const formData = new FormData();
-      formData.append("userId", currentUserId);
-      formData.append("question", question);
-      formData.append("topMenu", topMenu);
-      formData.append("subMenu", subMenu);
-
-      fetch("https://script.google.com/macros/s/AKfycbzeZl8HiFGm5VLw71_y96sNuPI9ZGfh3S3wqhEnq3jfeiUe3gXUbbYHLoKOj1nVKc4/exec", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.text())
-      .then(txt => console.log("Submitted:", txt))
-      .catch(err => console.error("Submission error:", err));
-    }
 
     function loadQuestion() {
       if (questionOrder.length === 0) {
@@ -249,73 +422,6 @@
       document.getElementById("selectedText").textContent = "";
       document.querySelector(".selected-info").classList.add("hidden");
       selectedTop = null;
-    }
-
-    function renderTopMenus() {
-    const container = document.getElementById("topMenus");
-    container.innerHTML = '';
-    Object.keys(topMenus).forEach(key => {
-        const btn = document.createElement("button");
-        // btn.textContent = `${key}. ${topMenus[key].label}`;
-        btn.textContent = `${topMenus[key].label}`;
-        btn.onclick = () => {
-        const question = questionOrder[currentQuestionIndex];
-        if (!selectionChanges[question]) selectionChanges[question] = 0;
-
-        if (selectedTop !== key) {
-            if (selectionChanges[question] > 2) {
-            alert("You can only change your selection 2 times per question!");
-            return;
-            }
-            selectionChanges[question]++;
-        }
-
-        selectedTop = key;
-        renderSubMenus(key);
-        document.getElementById("submenuContainer").classList.remove("hidden");
-
-        // Update selected text if submenu hasn't been chosen
-        if (!answerRecord[question]) {
-            document.getElementById("selectedTop").textContent = topMenus[key].label;
-            document.getElementById("selectedSub").textContent = "";
-            document.querySelector(".selected-info").classList.remove("hidden");
-        }
-        };
-        container.appendChild(btn);
-    });
-    }
-
-    function renderSubMenus(topKey) {
-      const container = document.getElementById("subMenus");
-      container.innerHTML = '';
-      const question = questionOrder[currentQuestionIndex];
-
-      if (!selectionChanges[question]) selectionChanges[question] = 0;
-      if (!firstSelection[question]) firstSelection[question] = false;
-
-      topMenus[topKey].subs.forEach(sub => {
-        const btn = document.createElement("button");
-        btn.textContent = sub;
-        btn.onclick = () => {
-          if (firstSelection[question]) {
-            if (selectionChanges[question] >= 4) {
-              alert("You can only change your selection 2 times for each question!");
-              return;
-            }
-            selectionChanges[question]++;
-          } else {
-            firstSelection[question] = true;
-          }
-
-          document.querySelector(".selected-info").classList.remove("hidden");
-          document.getElementById("selectedText").textContent = `${topMenus[topKey].label} - ${sub}`;
-          const topLabel = topMenus[topKey].label;
-          sendToSheet(question, topLabel, sub);
-          answerRecord[question] = { top: topLabel, sub };
-          saveSession();
-        };
-        container.appendChild(btn);
-      });
     }
 
     function nextQuestion() {
