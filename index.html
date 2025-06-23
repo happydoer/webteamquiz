@@ -240,51 +240,57 @@
     }
 
 
-  function renderTopMenus() {
-    const container = document.getElementById("topMenus");
-    container.innerHTML = '';
-    Object.keys(topMenus).forEach(key => {
-      const btn = document.createElement("button");
-      btn.textContent = `${topMenus[key].label}`;
-      btn.onclick = () => {
-        const question = questionOrder[currentQuestionIndex];
-        if (!selectionChanges[question]) selectionChanges[question] = { top: 0, sub: 0 };
-        if (selectedTop !== key) {
-          if (selectionChanges[question].top >= 2) {
-            alert("You can only change your top menu selection up to 2 times.");
-            return;
-          }
-          if (selectedTop !== null) selectionChanges[question].top++;
-          selectedTop = key;
-          selectedSub = null;
-          populateTopMenuSelect(key);
-          renderSubMenus(key);
-          document.getElementById("submenuContainer").classList.remove("hidden");
-          document.getElementById("customMenuBox").classList.remove("hidden");
-          sendToSheet(question, topMenus[key].label, "");
-          answerRecord[question] = { top: topMenus[key].label, sub: "" };
-          saveSession();
-        }
-      };
-      container.appendChild(btn);
-    });
-  }
+function renderTopMenus() {
+  const container = document.getElementById("topMenus");
+  container.innerHTML = '';
+  Object.keys(topMenus).forEach(key => {
+    const btn = document.createElement("button");
+    btn.textContent = `${topMenus[key].label}`;
+    btn.onclick = () => {
+      const question = questionOrder[currentQuestionIndex];
+      if (!selectionChanges[question]) selectionChanges[question] = { changes: 0 };
 
-    function renderSubMenus(topKey) {
-    const container = document.getElementById("subMenus");
-    container.innerHTML = '';
-    topMenus[topKey].subs.forEach(sub => {
+      const isTopChanged = selectedTop !== key;
+
+      if (isTopChanged) {
+        if (selectionChanges[question].changes >= 3) {
+          alert("Bạn chỉ được thay đổi lựa chọn tối đa 2 lần.");
+          return;
+        }
+        selectionChanges[question].changes++;
+        selectedTop = key;
+        selectedSub = null;
+
+        populateTopMenuSelect(key);
+        renderSubMenus(key);
+        document.getElementById("submenuContainer").classList.remove("hidden");
+        document.getElementById("customMenuBox").classList.remove("hidden");
+        sendToSheet(question, topMenus[key].label, "");
+        answerRecord[question] = { top: topMenus[key].label, sub: "" };
+        saveSession();
+      }
+    };
+    container.appendChild(btn);
+  });
+}
+
+function renderSubMenus(topKey) {
+  const container = document.getElementById("subMenus");
+  container.innerHTML = '';
+  topMenus[topKey].subs.forEach(sub => {
     const btn = document.createElement("button");
     btn.textContent = sub;
     btn.onclick = () => {
       const question = questionOrder[currentQuestionIndex];
-      if (!selectionChanges[question]) selectionChanges[question] = { top: 0, sub: 0 };
-      if (selectedSub !== sub) {
-        if (selectionChanges[question].sub >= 2) {
-          alert("You can only change your sub menu selection up to 2 times.");
+      if (!selectionChanges[question]) selectionChanges[question] = { changes: 0 };
+
+      const isSubChanged = selectedSub !== sub;
+      if (isSubChanged) {
+        if (selectionChanges[question].changes >= 3) {
+          alert("Bạn chỉ được thay đổi lựa chọn tối đa 2 lần.");
           return;
         }
-        if (selectedSub !== null) selectionChanges[question].sub++;
+        selectionChanges[question].changes++;
         selectedSub = sub;
         document.querySelector(".selected-info").classList.remove("hidden");
         document.getElementById("selectedText").textContent = `${topMenus[topKey].label} - ${sub}`;
@@ -294,8 +300,8 @@
       }
     };
     container.appendChild(btn);
-    });
-    }
+  });
+}
 
     function handleTopMenuSelection() {
     const value = document.getElementById("selectTopMenu").value;
