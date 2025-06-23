@@ -169,292 +169,276 @@
 
 
 
-  <script>
-    const validUserIds = ["S1", "S2", "S3", "S4", "S5", "lan"];
-    let currentUserId = "";
-    let questionOrder = [];
-    let answeredQuestions = [];
-    let currentQuestionIndex = 0;
-    let selectedTop = null;
-    let selectedSub = null;
-    let selectionChanges = {};
-    let answerRecord = {};
+<script>
+  const validUserIds = ["S1", "S2", "S3", "S4", "S5", "lan"];
+  let currentUserId = "";
+  let questionOrder = [];
+  let answeredQuestions = [];
+  let currentQuestionIndex = 0;
+  let selectedTop = null;
+  let selectedSub = null;
+  let selectionChanges = {};
+  let answerRecord = {};
 
-    const questions = [
-      "1. You're planning to take a Graphic design book from the library and want to confirm how long you can keep it.",
-      "2. Find a private space for a group meeting.",
-      "3. For a group assignment, you need an academic article, but you can't find it anywhere in the library's collection. You want to ask the library to make it available.",
-      "4. You need guidance on how to properly cite external sources for your assignment. You want to schedule a meeting with a library staff member to go through it.",
-      "5. Find out if you could still access physical and electronic items from the library's collection even after you graduated from RMIT.",
-      "6. You want to use AI generative tool to brainstorm some ideas for your assignment. Do you need to declare that you have used it?",
-      "7. For a group presentation, you want to use some images and video clips from the internet. Do you need to cite them or can you just them freely?",
-      "8. You have unique learning requirements and are looking for information on accommodations and assistance provided by the library ",
-      "9. You heard that the library often hosts sessions to help students with things like researching and citing. You would like to attend one.",
-      "10. You're working on an assignment and need to find unique historical images or visual materials.",
-      "11. You successfully defended your thesis and would like to share your outputs with the RMIT community.",
-      "12. Find out whether the library is open on Saturday and until what time.",
-      "13. You are beginning a big research project for your Economics course. You want to find a library expert for your course topic."
-    ];
+  const questions = [
+    "1. You're planning to take a Graphic design book from the library and want to confirm how long you can keep it.",
+    "2. Find a private space for a group meeting.",
+    "3. For a group assignment, you need an academic article, but you can't find it anywhere in the library's collection. You want to ask the library to make it available.",
+    "4. You need guidance on how to properly cite external sources for your assignment. You want to schedule a meeting with a library staff member to go through it.",
+    "5. Find out if you could still access physical and electronic items from the library's collection even after you graduated from RMIT.",
+    "6. You want to use AI generative tool to brainstorm some ideas for your assignment. Do you need to declare that you have used it?",
+    "7. For a group presentation, you want to use some images and video clips from the internet. Do you need to cite them or can you just them freely?",
+    "8. You have unique learning requirements and are looking for information on accommodations and assistance provided by the library ",
+    "9. You heard that the library often hosts sessions to help students with things like researching and citing. You would like to attend one.",
+    "10. You're working on an assignment and need to find unique historical images or visual materials.",
+    "11. You successfully defended your thesis and would like to share your outputs with the RMIT community.",
+    "12. Find out whether the library is open on Saturday and until what time.",
+    "13. You are beginning a big research project for your Economics course. You want to find a library expert for your course topic."
+  ];
 
-    const topMenus = {
-      1: { label: "1. Borrowing and booking", subs: ["1.1 Borrowing and returning", "1.2 Book a study room", "1.3 Make a purchase request", "1.4 Book your consultation", "1.5 Alumni support"] },
-      2: { label: "2. Study", subs: ["2.1 Referencing", "2.2 Copyright advice", "2.3 Disability and neurodiversity support", "2.4 Sign up for live workshops"] },
-      3: { label: "3. Teach", subs: ["3.1 Developing course content", "3.2 Organise workshops and consultations", "3.3 Teach using Open Education Resources", "3.4 Copyright advice"] },
-      4: { label: "4. Research", subs: ["4.1 Open Textbook", "4.2 Digital archive", "4.3 Research data", "4.4 Open Acess Publishing"] },
-      5: { label: "5. About Us", subs: ["5.1 Hours and locations", "5.2 Meet the team"] }
-    };
+  const topMenus = {
+    1: { label: "1. Borrowing and booking", subs: ["1.1 Borrowing and returning", "1.2 Book a study room", "1.3 Make a purchase request", "1.4 Book your consultation", "1.5 Alumni support"] },
+    2: { label: "2. Study", subs: ["2.1 Referencing", "2.2 Copyright advice", "2.3 Disability and neurodiversity support", "2.4 Sign up for live workshops"] },
+    3: { label: "3. Teach", subs: ["3.1 Developing course content", "3.2 Organise workshops and consultations", "3.3 Teach using Open Education Resources", "3.4 Copyright advice"] },
+    4: { label: "4. Research", subs: ["4.1 Open Textbook", "4.2 Digital archive", "4.3 Research data", "4.4 Open Acess Publishing"] },
+    5: { label: "5. About Us", subs: ["5.1 Hours and locations", "5.2 Meet the team"] }
+  };
 
-    function saveSession() {
-      localStorage.setItem("quizUser", currentUserId);
-      localStorage.setItem("quizAnswered", JSON.stringify(answeredQuestions));
-      localStorage.setItem("quizOrder", JSON.stringify(questionOrder));
+  function saveSession() {
+    localStorage.setItem("quizUser", currentUserId);
+    localStorage.setItem("quizAnswered", JSON.stringify(answeredQuestions));
+    localStorage.setItem("quizOrder", JSON.stringify(questionOrder));
+  }
+
+  function loadSession() {
+    const user = localStorage.getItem("quizUser");
+    if (user) {
+      document.getElementById("startBtn").classList.add("hidden");
+      document.getElementById("resumeBtn").classList.remove("hidden");
+      document.getElementById("newUserBtn").classList.remove("hidden");
+      document.getElementById("userId").value = user;
     }
+  }
 
-    function loadSession() {
-      const user = localStorage.getItem("quizUser");
-      if (user) {
-        document.getElementById("startBtn").classList.add("hidden");
-        document.getElementById("resumeBtn").classList.remove("hidden");
-        document.getElementById("newUserBtn").classList.remove("hidden");
-        document.getElementById("userId").value = user;
-      }
+  function populateTopMenuSelect(selectedKey = null) {
+    const select = document.getElementById("selectTopMenu");
+    select.innerHTML = '<option value="">-- Select Top Menu --</option>';
+    if (selectedKey && topMenus[selectedKey]) {
+      const option = document.createElement("option");
+      option.value = selectedKey;
+      option.textContent = topMenus[selectedKey].label;
+      option.selected = true;
+      select.appendChild(option);
     }
+    const customOption = document.createElement("option");
+    customOption.value = "custom";
+    customOption.textContent = "Create new Top/Sub Menu";
+    select.appendChild(customOption);
+  }
 
-    function populateTopMenuSelect(selectedKey = null) {
-      const select = document.getElementById("selectTopMenu");
-      select.innerHTML = '<option value="">-- Select Top Menu --</option>';
-      if (selectedKey && topMenus[selectedKey]) {
-        const option = document.createElement("option");
-        option.value = selectedKey;
-        option.textContent = topMenus[selectedKey].label;
-        option.selected = true;
-        select.appendChild(option);
-      }
-      const customOption = document.createElement("option");
-      customOption.value = "custom";
-      customOption.textContent = "Create new Top/Sub Menu";
-      select.appendChild(customOption);
-    }
-
-    function renderTopMenus() {
-      const container = document.getElementById("topMenus");
-      container.innerHTML = '';
-      Object.keys(topMenus).forEach(key => {
-        const btn = document.createElement("button");
-        btn.textContent = `${topMenus[key].label}`;
-        btn.onclick = () => {
-          const question = questions[currentQuestionIndex];
-          if (!selectionChanges[question]) selectionChanges[question] = { top: 0, sub: 0 };
-
-          if (selectedTop !== key) {
-            if (selectionChanges[question].top >= 2) {
-              alert("You can only change your top menu selection up to 2 times.");
-              return;
-            }
-            if (selectedTop !== null) selectionChanges[question].top++;
-            selectedTop = key;
-            selectedSub = null;
-            populateTopMenuSelect(key);
-            renderSubMenus(key);
-            document.getElementById("submenuContainer").classList.remove("hidden");
-            document.getElementById("customMenuBox").classList.remove("hidden");
+  function renderTopMenus() {
+    const container = document.getElementById("topMenus");
+    container.innerHTML = '';
+    Object.keys(topMenus).forEach(key => {
+      const btn = document.createElement("button");
+      btn.textContent = `${topMenus[key].label}`;
+      btn.onclick = () => {
+        const question = questions[currentQuestionIndex];
+        if (!selectionChanges[question]) selectionChanges[question] = { top: 0, sub: 0 };
+        if (selectedTop !== key) {
+          if (selectionChanges[question].top >= 2) {
+            alert("You can only change your top menu selection up to 2 times.");
+            return;
           }
-        };
-        container.appendChild(btn);
-      });
-    }
+          if (selectedTop !== null) selectionChanges[question].top++;
+          selectedTop = key;
+          selectedSub = null;
+          populateTopMenuSelect(key);
+          renderSubMenus(key);
+          document.getElementById("submenuContainer").classList.remove("hidden");
+          document.getElementById("customMenuBox").classList.remove("hidden");
+          sendToSheet(question, topMenus[key].label, "");
+          answerRecord[question] = { top: topMenus[key].label, sub: "" };
+          saveSession();
+        }
+      };
+      container.appendChild(btn);
+    });
+  }
 
-    function renderSubMenus(topKey) {
-      const container = document.getElementById("subMenus");
-      container.innerHTML = '';
-      topMenus[topKey].subs.forEach(sub => {
-        const btn = document.createElement("button");
-        btn.textContent = sub;
-        btn.onclick = () => {
-          const question = questions[currentQuestionIndex];
-          if (!selectionChanges[question]) selectionChanges[question] = { top: 0, sub: 0 };
-
-          if (selectedSub !== sub) {
-            if (selectionChanges[question].sub >= 2) {
-              alert("You can only change your sub menu selection up to 2 times.");
-              return;
-            }
-            if (selectedSub !== null) selectionChanges[question].sub++;
-            selectedSub = sub;
-
-            document.querySelector(".selected-info").classList.remove("hidden");
-            document.getElementById("selectedText").textContent = `${topMenus[topKey].label} - ${sub}`;
-            sendToSheet(question, topMenus[topKey].label, sub);
-            answerRecord[question] = { top: topMenus[topKey].label, sub };
-            saveSession();
+  function renderSubMenus(topKey) {
+    const container = document.getElementById("subMenus");
+    container.innerHTML = '';
+    topMenus[topKey].subs.forEach(sub => {
+      const btn = document.createElement("button");
+      btn.textContent = sub;
+      btn.onclick = () => {
+        const question = questions[currentQuestionIndex];
+        if (!selectionChanges[question]) selectionChanges[question] = { top: 0, sub: 0 };
+        if (selectedSub !== sub) {
+          if (selectionChanges[question].sub >= 2) {
+            alert("You can only change your sub menu selection up to 2 times.");
+            return;
           }
-        };
-        container.appendChild(btn);
-      });
+          if (selectedSub !== null) selectionChanges[question].sub++;
+          selectedSub = sub;
+          document.querySelector(".selected-info").classList.remove("hidden");
+          document.getElementById("selectedText").textContent = `${topMenus[topKey].label} - ${sub}`;
+          sendToSheet(question, topMenus[topKey].label, sub);
+          answerRecord[question] = { top: topMenus[topKey].label, sub };
+          saveSession();
+        }
+      };
+      container.appendChild(btn);
+    });
+  }
+
+  function handleTopMenuSelection() {
+    const value = document.getElementById("selectTopMenu").value;
+    const customInput = document.getElementById("customTopMenu");
+    const subInput = document.getElementById("customSubMenu");
+    const submitBtn = document.getElementById("submitCustomBtn");
+
+    if (value === "") {
+      customInput.classList.add("hidden");
+      subInput.classList.add("hidden");
+      submitBtn.classList.add("hidden");
+      return;
     }
-
-
-    function handleTopMenuSelection() {
-      const value = document.getElementById("selectTopMenu").value;
-      const customInput = document.getElementById("customTopMenu");
-      const subInput = document.getElementById("customSubMenu");
-      const submitBtn = document.getElementById("submitCustomBtn");
-
-      if (value === "") {
-        customInput.classList.add("hidden");
-        subInput.classList.add("hidden");
-        submitBtn.classList.add("hidden");
-        return;
-      }
-      subInput.classList.remove("hidden");
-      submitBtn.classList.remove("hidden");
-
-      if (value === "custom") {
-        customInput.classList.remove("hidden");
-      } else {
-        customInput.classList.add("hidden");
-      }
-    }
-
-
-    function submitCustomMenu() {
-      const question = questionOrder[currentQuestionIndex];
-      const selectVal = document.getElementById("selectTopMenu").value;
-      const topMenu = selectVal === "custom" ? document.getElementById("customTopMenu").value.trim() : topMenus[selectVal]?.label || "";
-      const subMenu = document.getElementById("customSubMenu").value.trim();
-
-      if (!topMenu) {
-        alert("You need to select or create a Top Menu.");
-        return;
-      }
-
-      document.querySelector(".selected-info").classList.remove("hidden");
-      document.getElementById("selectedText").textContent = subMenu ? `${topMenu} - ${subMenu}` : topMenu;
-      sendToSheet(question, topMenu, subMenu);
-      answerRecord[question] = { top: topMenu, sub: subMenu };
-      saveSession();
-      document.getElementById("customTopMenu").value = "";
-      document.getElementById("customSubMenu").value = "";
-    }
-
-
-    function loadSession() {
-      const user = localStorage.getItem("quizUser");
-      if (user) {
-        document.getElementById("startBtn").classList.add("hidden");
-        document.getElementById("resumeBtn").classList.remove("hidden");
-        document.getElementById("newUserBtn").classList.remove("hidden");
-        document.getElementById("userId").value = user;
+    subInput.classList.remove("hidden");
+    submitBtn.classList.remove("hidden");
+    if (value === "custom") {
+      customInput.classList.remove("hidden");
+    } else {
+      customInput.classList.add("hidden");
+      const question = questions[currentQuestionIndex];
+      const topMenuLabel = topMenus[value]?.label || "";
+      if (topMenuLabel) {
+        sendToSheet(question, topMenuLabel, "");
+        answerRecord[question] = { top: topMenuLabel, sub: "" };
+        saveSession();
       }
     }
+  }
 
-    function resumeSession() {
-      currentUserId = localStorage.getItem("quizUser");
-      answeredQuestions = JSON.parse(localStorage.getItem("quizAnswered")) || [];
-      questionOrder = JSON.parse(localStorage.getItem("quizOrder")) || [...questions];
-      questionOrder = questionOrder.filter(q => !answeredQuestions.includes(q));
+  function submitCustomMenu() {
+    const question = questionOrder[currentQuestionIndex];
+    const selectVal = document.getElementById("selectTopMenu").value;
+    const topMenu = selectVal === "custom" ? document.getElementById("customTopMenu").value.trim() : topMenus[selectVal]?.label || "";
+    const subMenu = document.getElementById("customSubMenu").value.trim();
+    if (!topMenu) {
+      alert("You need to select or create a Top Menu.");
+      return;
+    }
+    document.querySelector(".selected-info").classList.remove("hidden");
+    document.getElementById("selectedText").textContent = subMenu ? `${topMenu} - ${subMenu}` : topMenu;
+    sendToSheet(question, topMenu, subMenu);
+    answerRecord[question] = { top: topMenu, sub: subMenu };
+    saveSession();
+    document.getElementById("customTopMenu").value = "";
+    document.getElementById("customSubMenu").value = "";
+  }
+
+  function resumeSession() {
+    currentUserId = localStorage.getItem("quizUser");
+    answeredQuestions = JSON.parse(localStorage.getItem("quizAnswered")) || [];
+    questionOrder = JSON.parse(localStorage.getItem("quizOrder")) || [...questions];
+    questionOrder = questionOrder.filter(q => !answeredQuestions.includes(q));
+    currentQuestionIndex = 0;
+    if (questionOrder.length === 0) {
+      alert("You have completed all questions.");
+      showLoginBox();
+      return;
+    }
+    document.getElementById("loginBox").style.display = "none";
+    document.querySelectorAll(".question-box, .menu-box, .navigation, .selected-info, .submenu-box").forEach(el => el.classList.remove("hidden"));
+    loadQuestion();
+    renderTopMenus();
+  }
+
+  function startNewSession() {
+    localStorage.clear();
+    document.getElementById("startBtn").classList.remove("hidden");
+    document.getElementById("resumeBtn").classList.add("hidden");
+    document.getElementById("newUserBtn").classList.add("hidden");
+    document.getElementById("loginMessage").textContent = "";
+  }
+
+  function validateUserId(force = false) {
+    const inputId = document.getElementById("userId").value.trim();
+    if (validUserIds.includes(inputId)) {
+      currentUserId = inputId;
+      questionOrder = [...questions].sort(() => 0.5 - Math.random());
+      answeredQuestions = [];
       currentQuestionIndex = 0;
-      if (questionOrder.length === 0) {
-        alert("You have completed all questions.");
-        showLoginBox();
-        return;
-      }
+      saveSession();
       document.getElementById("loginBox").style.display = "none";
       document.querySelectorAll(".question-box, .menu-box, .navigation, .selected-info, .submenu-box").forEach(el => el.classList.remove("hidden"));
+      document.getElementById("customMenuBox").classList.remove("hidden");
       loadQuestion();
       renderTopMenus();
+      populateTopMenuSelect();
+    } else {
+      document.getElementById("loginMessage").textContent = "User ID not found.";
     }
+  }
 
-    function startNewSession() {
-      localStorage.clear();
-      document.getElementById("startBtn").classList.remove("hidden");
-      document.getElementById("resumeBtn").classList.add("hidden");
-      document.getElementById("newUserBtn").classList.add("hidden");
-      document.getElementById("loginMessage").textContent = "";
+  function loadQuestion() {
+    if (questionOrder.length === 0) {
+      alert("All questions completed.");
+      showLoginBox();
+      return;
     }
+    document.getElementById("question").textContent = questionOrder[currentQuestionIndex];
+    document.getElementById("submenuContainer").classList.add("hidden");
+    document.getElementById("selectedText").textContent = "";
+    document.querySelector(".selected-info").classList.add("hidden");
+    selectedTop = null;
+  }
 
-    function validateUserId(force = false) {
-      const inputId = document.getElementById("userId").value.trim();
-      if (validUserIds.includes(inputId)) {
-        currentUserId = inputId;
-        questionOrder = [...questions].sort(() => 0.5 - Math.random());
-        answeredQuestions = [];
-        currentQuestionIndex = 0;
-        saveSession();
-        document.getElementById("loginBox").style.display = "none";
-        document.querySelectorAll(".question-box, .menu-box, .navigation, .selected-info, .submenu-box").forEach(el => el.classList.remove("hidden"));
-        document.getElementById("customMenuBox").classList.remove("hidden");
-        loadQuestion();
-        renderTopMenus();
-        populateTopMenuSelect();
-      } else {
-        document.getElementById("loginMessage").textContent = "User ID not found.";
-      }
+  function nextQuestion() {
+    const question = questionOrder[currentQuestionIndex];
+    if (!answerRecord[question]) {
+      const topLabel = selectedTop ? topMenus[selectedTop].label : "";
+      sendToSheet(question, topLabel, "");
+      answerRecord[question] = { top: topLabel, sub: "" };
     }
-
-
-    function loadQuestion() {
-      if (questionOrder.length === 0) {
-        alert("All questions completed.");
-        showLoginBox();
-        return;
-      }
-      document.getElementById("question").textContent = questionOrder[currentQuestionIndex];
-      document.getElementById("submenuContainer").classList.add("hidden");
-      document.getElementById("selectedText").textContent = "";
-      document.querySelector(".selected-info").classList.add("hidden");
-      selectedTop = null;
+    answeredQuestions.push(question);
+    if (currentQuestionIndex < questionOrder.length - 1) {
+      currentQuestionIndex++;
+      saveSession();
+      loadQuestion();
+    } else {
+      showLoginBox();
     }
+  }
 
-    function nextQuestion() {
-      const question = questionOrder[currentQuestionIndex];
-      if (!answerRecord[question]) {
-        const topLabel = selectedTop ? topMenus[selectedTop].label : "";
-        sendToSheet(question, topLabel, "");
-        answerRecord[question] = { top: topLabel, sub: "" };
-      }
-      answeredQuestions.push(question);
+  function sendToSheet(question, topMenu, subMenu) {
+    const formData = new FormData();
+    formData.append("userId", currentUserId);
+    formData.append("question", question);
+    formData.append("topMenu", topMenu);
+    formData.append("subMenu", subMenu);
+    fetch("https://script.google.com/macros/s/AKfycbzeZl8HiFGm5VLw71_y96sNuPI9ZGfh3S3wqhEnq3jfeiUe3gXUbbYHLoKOj1nVKc4/exec", {
+      method: "POST",
+      body: formData
+    })
+    .then(res => res.text())
+    .then(txt => console.log("Submitted:", txt))
+    .catch(err => console.error("Submission error:", err));
+  }
 
-      if (currentQuestionIndex < questionOrder.length - 1) {
-        currentQuestionIndex++;
-        saveSession();
-        loadQuestion();
-      } else {
-        showLoginBox();
-      }
-    }
+  function showLoginBox() {
+    document.querySelectorAll(".question-box, .menu-box, .submenu-box, .navigation, .selected-info, .summary-box").forEach(el => el.classList.add("hidden"));
+    document.getElementById("loginBox").style.display = "block";
+    document.getElementById("resumeBtn").classList.add("hidden");
+    document.getElementById("newUserBtn").classList.add("hidden");
+    document.getElementById("startBtn").classList.remove("hidden");
+    document.getElementById("userId").value = "";
+  }
 
+  window.onload = loadSession;
+</script>
 
-    function sendToSheet(question, topMenu, subMenu) {
-      const formData = new FormData();
-      formData.append("userId", currentUserId);
-      formData.append("question", question);
-      formData.append("topMenu", topMenu);
-      formData.append("subMenu", subMenu);
-      fetch("https://script.google.com/macros/s/AKfycbzeZl8HiFGm5VLw71_y96sNuPI9ZGfh3S3wqhEnq3jfeiUe3gXUbbYHLoKOj1nVKc4/exec", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.text())
-      .then(txt => console.log("Submitted:", txt))
-      .catch(err => console.error("Submission error:", err));
-    }    function saveSession() {
-      localStorage.setItem("quizUser", currentUserId);
-      localStorage.setItem("quizAnswered", JSON.stringify(answeredQuestions));
-      localStorage.setItem("quizOrder", JSON.stringify(questionOrder));
-    }
-
-
-    function showLoginBox() {
-      document.querySelectorAll(".question-box, .menu-box, .submenu-box, .navigation, .selected-info, .summary-box").forEach(el => el.classList.add("hidden"));
-      document.getElementById("loginBox").style.display = "block";
-      document.getElementById("resumeBtn").classList.add("hidden");
-      document.getElementById("newUserBtn").classList.add("hidden");
-      document.getElementById("startBtn").classList.remove("hidden");
-      document.getElementById("userId").value = "";
-    }
-
-    window.onload = loadSession;
-  </script>
 </body>
 </html>
