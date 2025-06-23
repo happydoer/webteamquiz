@@ -131,18 +131,28 @@
   </div>
 
   <div class="menu-box hidden">
-    <p style="font-weight: bold">Select category:</p>
+    <p style="font-weight: bold">Select Top Menu:</p>
     <div id="topMenus"></div>
   </div>
 
   <div class="submenu-box hidden" id="submenuContainer" >
-    <p style="font-weight: bold">Select detail:</p>
+    <p style="font-weight: bold">Select Sub Menu:</p>
     <div id="subMenus"></div>
   </div>
 
   <div class="selected-info hidden">
     <p id="selectedLabel">You selected:</p>
     <p id="selectedText"></p>
+  </div>
+
+    <div class="menu-box hidden" id="customMenuBox">
+    <p style="font-weight: bold">Select or create a new Top Menu/Sub Menu:</p>
+    <select id="selectTopMenu" onchange="handleTopMenuSelection()">
+      <option value="">-- Select Top Menu --</option>
+    </select>
+    <input type="text" id="customTopMenu" placeholder="(Optional) Enter new Top Menu..." class="hidden">
+    <input type="text" id="customSubMenu" placeholder="(Optional) Enter Sub Menu..." class="hidden">
+    <button onclick="submitCustomMenu()" class="hidden" id="submitCustomBtn">Submit your selection</button>
   </div>
 
   <div class="navigation hidden">
@@ -157,15 +167,7 @@
   </div>
 
 
-  <div class="menu-box hidden" id="customMenuBox">
-    <p style="font-weight: bold">Select or create a new Top Menu/Sub Menu:</p>
-    <select id="selectTopMenu" onchange="handleTopMenuSelection()">
-      <option value="">-- Select Top Menu --</option>
-    </select>
-    <input type="text" id="customTopMenu" placeholder="(Optional) Enter new Top Menu..." class="hidden">
-    <input type="text" id="customSubMenu" placeholder="(Optional) Enter Sub Menu..." class="hidden">
-    <button onclick="submitCustomMenu()" class="hidden" id="submitCustomBtn">Submit your selection</button>
-  </div>
+
 
 
 <script>
