@@ -376,7 +376,7 @@ function renderSubMenus(topKey) {
 async function validateUserId(force = false) {
   const inputId = document.getElementById("userId").value.trim();
   const loginMessage = document.getElementById("loginMessage");
-  loginMessage.textContent = "Checking User ID...";
+  // loginMessage.textContent = "Checking User ID...";
 
   try {
     const formData = new URLSearchParams();
