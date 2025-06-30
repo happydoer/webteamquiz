@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Add menu function -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tree Testing Landing Page</title>
@@ -181,19 +180,19 @@
     let answerRecord = {};
 
     const questions = [
-    "1. You're planning to take a Graphic design book from the library and want to confirm how long you can keep it.",
-    "2. Find a private space for a group meeting.",
-    "3. For a group assignment, you need an academic article, but you can't find it anywhere in the library's collection. You want to ask the library to make it available.",
-    "4. You need guidance on how to properly cite external sources for your assignment. You want to schedule a meeting with a library staff member to go through it.",
-    "5. Find out if you could still access physical and electronic items from the library's collection even after you graduated from RMIT.",
-    "6. You want to use AI generative tool to brainstorm some ideas for your assignment. Do you need to declare that you have used it?",
-    "7. For a group presentation, you want to use some images and video clips from the internet. Do you need to cite them or can you just them freely?",
-    "8. You have unique learning requirements and are looking for information on accommodations and assistance provided by the library ",
-    "9. You heard that the library often hosts sessions to help students with things like researching and citing. You would like to attend one.",
-    "10. You're working on an assignment and need to find unique historical images or visual materials.",
-    "11. You successfully defended your thesis and would like to share your outputs with the RMIT community.",
-    "12. Find out whether the library is open on Saturday and until what time.",
-    "13. You are beginning a big research project for your Economics course. You want to find a library expert for your course topic."
+    "1. A student is stressed about a library late fine notice. Where do you direct them for information?",
+    "2. A new student wants to find a private space for a group meeting. Help them locate where on the library website they could do this.",
+    "3. A student needs an academic article but they can't find it anywhere in the library's collection. They want the library to make it available to them. Where on the library website could they do this?",
+    "4. Some of the students you are supporting are struggling to find and evaluate academic materials for their assignments. You want them to get extra help in-person from the library.",
+    "5. A student is about to graduate soon and wonders if they could still access physical and electronic items from the library collection even after graduating from RMIT.",
+    "6. Some students wonders if they can use AI generative tool to brainstorm some ideas for their assignment. They are unsure whether they need to  declare that they have used it.",
+    "7. Some students want to use images and video clips they found on the Internet for their assignments. They are unsure whether they need to cite them or not.",
+    "8. A student approaches you, stating they have a visual impairment and need physical handouts converted to a digital format for their coursework.",
+    "9. You want to help new students learn how to cite properly. Where would you direct them to find opportunities to learn these skills?",
+    "10. A student approaches you asking if the library has any special historical collections and visual materials they could use for their project.",
+    "11.A postgraduate student successfully defended their thesis and would like to share it with the RMIT community. Where on the library website could they do this?",
+    "12. Some students want to come to the library on the weekends to study but unsure if it's open. Where can they find out?",
+    "13. A student begins a big project for their Economics course and needs special help. They want to find out who is the library expert for their study topic. Where would you direct them to?"
     ];
 
     const topMenus = {
@@ -253,7 +252,7 @@ function renderTopMenus() {
 
       if (isTopChanged) {
         if (selectionChanges[question].changes >= 3) {
-          alert("Bạn chỉ được thay đổi lựa chọn tối đa 2 lần.");
+          alert("You could only go back two times per task.");
           return;
         }
         selectionChanges[question].changes++;
@@ -286,7 +285,7 @@ function renderSubMenus(topKey) {
       const isSubChanged = selectedSub !== sub;
       if (isSubChanged) {
         if (selectionChanges[question].changes >= 3) {
-          alert("Bạn chỉ được thay đổi lựa chọn tối đa 2 lần.");
+          alert("You could only go back two times per task.");
           return;
         }
         selectionChanges[question].changes++;
